@@ -1,5 +1,5 @@
 # language-identification-benchmark
-Repo to test several language ID tools on several types of texts
+Repo to test several language ID tools on several types of texts. See https://github.com/ec-doris/drivein-cdk/issues/269
 
 ## Current tools
 
