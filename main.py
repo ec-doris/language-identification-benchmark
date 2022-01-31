@@ -18,6 +18,7 @@ scores["langid"] = []
 scores["glcd3"] = []
 scores["transliterate"] = []
 scores["whatthelang"] = []
+scores["langdetect"] = []
 
 
 print(f"### We have data for {len(texts)} languages")
@@ -53,6 +54,13 @@ for lang, li in texts.items():
         if guessed == lang:
                 correct += 1
     scores["whatthelang"].append(correct)
+
+    correct = 0
+    for ph in li:
+        guessed = lang_detect(ph)
+        if guessed == lang:
+                correct += 1
+    scores["langdetect"].append(correct)
 
 
 for tool in scores:

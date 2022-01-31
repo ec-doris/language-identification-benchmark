@@ -14,5 +14,5 @@ from transliterate import detect_language
 from whatthelang import WhatTheLang
 wtl = WhatTheLang()
 
-
+from langdetect import detect as lang_detect
 
