@@ -1,6 +1,8 @@
 from utils import *
 import sys
-collections = ["kohesio", "normal"]
+collections = [file.split("_")[0] for file in os.listdir("collections")]
+
+print(f"### We have {len(collections)} collections available: {collections}")
 
 try:
     collection = sys.argv[1]
@@ -21,7 +23,10 @@ scores["whatthelang"] = []
 scores["langdetect"] = []
 
 
-print(f"### We have data for {len(texts)} languages")
+print(f"### For corpus {collection}, we have data for {len(texts)} languages")
+
+### TODO: PROPER EVAL PIPELINE
+
 
 for lang, li in texts.items():
     correct = 0
@@ -65,7 +70,7 @@ for lang, li in texts.items():
 
 for tool in scores:
     avg = round(sum(scores[tool])/len(scores[tool]), 1)
-    print(f"{tool}: average of  {avg} out of 5 across {len(texts)} langs, distrib: {scores[tool]} ")    
+    print(f"{tool}: average of {avg} out of {len(texts[lang])} across {len(texts)} langs, distrib: {scores[tool]} ")    
 
 
 not_tested = set(EU_LANGUAGES) - set(texts.keys())
