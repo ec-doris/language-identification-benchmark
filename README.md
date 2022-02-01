@@ -18,8 +18,15 @@ Not considered for now:
 ## Use
 `python main.py $COLLECTION`
 
-where `$COLLECTION` is currently only `kohesio`
+where `$COLLECTION` is currently `kohesio`, `emea`, `eubooks`, `europarl`, `subs`, `wikimatrix`
 
 ## Data
 
 - `kohesio` contains very small texts -- beneficiaries from Kohesio. We only find 2 beneficiaries in Maltese in Kohesio, so `mt` is not included in this collection. 
+- Other corpora were downloaded from https://opus.nlpl.eu/
+
+Data can be downloaded with `python download.py`, although it is included in the repo
+
+## TODO
+
+Proper evaluation pipeline
