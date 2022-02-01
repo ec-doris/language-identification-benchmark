@@ -1,0 +1,11 @@
+cysignals==1.11.2
+Cython==0.29.26
+future==0.18.2
+gcld3==3.0.13
+langdetect==1.0.9
+langid==1.1.6
+numpy==1.22.1
+pyfasttext==0.4.6
+six==1.16.0
+transliterate==1.10.2
+whatthelang==1.0.1
