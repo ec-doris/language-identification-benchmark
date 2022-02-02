@@ -1,6 +1,8 @@
 import json
 import os
 import langid
+import sys
+import random
 
 ################################### 
 ####  Language detection stuff ####
@@ -19,7 +21,7 @@ from whatthelang import WhatTheLang
 wtl = WhatTheLang()
 
 from langdetect import detect as lang_detect
-
+from langdetect.lang_detect_exception import LangDetectException
 
 ################################### 
 ####     Evaluation stuff      ####
@@ -58,18 +60,32 @@ def eval_on_texts(texts):
                 results['transliterate'].append(True)
             else:
                 results['transliterate'].append(False)
-
-            guessed = wtl.predict_lang(ph)     
-            if guessed == lang:
-                results['whatthelang'].append(True)
-            else:
+            
+            try:
+            # There apparently is a prepro step
+            # where they remove digits and punct
+            # leaving absolutely nothing in some very small string
+            # which then throws ValueError: Not enough text to predict language
+                guessed = wtl.predict_lang(ph)     
+                if guessed == lang:
+                    results['whatthelang'].append(True)
+                else:
+                    results['whatthelang'].append(False)
+            except ValueError:
                 results['whatthelang'].append(False)
-
-            guessed = lang_detect(ph)     
-            if guessed == lang:
-                results['langdetect'].append(True)
-            else:
-                results['langdetect'].append(False)
+            
+            try:
+            # There apparently is a prepro step
+            # where they remove digits and punct
+            # leaving absolutely nothing in some very small string
+            # which then throws langdetect.lang_detect_exception.LangDetectException: No features in text.
+                guessed = lang_detect(ph)
+                if guessed == lang:
+                    results['langdetect'].append(True)
+                else:
+                    results['langdetect'].append(False)
+            except LangDetectException:
+                results['langdetect'].append(False) 
 
     return results
 
@@ -123,7 +139,9 @@ def OPUS_downloader(corpus, num_sentences = 100):
         try:
             file = [f for f in files if lang in f[-2:]][0] # we take whatever first ".lang" file
             with open(file) as f:
-                sentences = [line.rstrip() for line in f][:num_sentences]
+                sentences = [line.rstrip() for line in f]
+                random.shuffle(sentences)
+                sentences = sentences[:num_sentences]
 
             dictionary[lang] = sentences
         except IndexError:
@@ -133,6 +151,27 @@ def OPUS_downloader(corpus, num_sentences = 100):
         json.dump(dictionary, f, ensure_ascii=False, indent=4)
 
 
+################################### 
+####       Plotting stuff      ####
+###################################
 
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
-        
+if not os.path.exists("results"):
+    os.mkdir("results")
+
+def plot_perf(df, cols, collection, not_tested, open_window=False):
+    fig = make_subplots(rows=1, cols=5, subplot_titles=('langid', 'glcd3', 'transliterate', 'whatthelang', 'langdetect'), shared_yaxes="all")
+    L= len(df)
+
+    cnames = list(df.columns)
+    for k, name in enumerate(cnames):
+        n_true = df[name].sum()
+        fig.add_trace(go.Bar(x=['True', 'False'], y=[n_true, L-n_true], name=name ), 1,k+1)
+    fig.update_layout(barmode='relative',  bargap=0.05, width=1200, height=800,  title=f"Performance across all languages for corpus {collection}. Untested language(s): {not_tested}")
+    
+    if open_window:
+        fig.write_html(f'results/perf_{collection}.html', auto_open=True)
+    else:
+        fig.write_html(f'results/perf_{collection}.html')#, auto_open=True)
