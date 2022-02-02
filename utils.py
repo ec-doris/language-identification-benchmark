@@ -21,14 +21,66 @@ wtl = WhatTheLang()
 from langdetect import detect as lang_detect
 
 
+################################### 
+####     Evaluation stuff      ####
+###################################
+
+def eval_on_texts(texts):
+    results = {
+    "Sentence": [],
+    "Language": [],
+    "langid": [],
+    "glcd3": [],
+    "transliterate": [],
+    "whatthelang": [],
+    "langdetect": [],
+        }
+
+    for lang, li in texts.items():
+        for ph in li:
+            results['Language'].append(lang)
+            results['Sentence'].append(ph)
+            
+            guessed = langid.classify(ph)[0]
+            if guessed == lang:
+                results['langid'].append(True)
+            else:
+                results['langid'].append(False)
+
+            guessed = detector.FindLanguage(text=ph).language        
+            if guessed == lang:
+                results['glcd3'].append(True)
+            else:
+                results['glcd3'].append(False)
+            
+            guessed = detect_language(ph)
+            if guessed == lang:
+                results['transliterate'].append(True)
+            else:
+                results['transliterate'].append(False)
+
+            guessed = wtl.predict_lang(ph)     
+            if guessed == lang:
+                results['whatthelang'].append(True)
+            else:
+                results['whatthelang'].append(False)
+
+            guessed = lang_detect(ph)     
+            if guessed == lang:
+                results['langdetect'].append(True)
+            else:
+                results['langdetect'].append(False)
+
+    return results
 
 ################################### 
-####  Language detection stuff ####
+####  Downloading files  stuff ####
 ###################################
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from io import BytesIO
 from zipfile import ZipFile
+import pandas as pd
 
 corpus_url = {
     "subs": "https://opus.nlpl.eu/download.php?f=OpenSubtitles/v1/moses/bg-€OTHERLANG€.txt.zip",
