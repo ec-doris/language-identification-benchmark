@@ -23,6 +23,18 @@ wtl = WhatTheLang()
 from langdetect import detect as lang_detect
 from langdetect.lang_detect_exception import LangDetectException
 
+import subprocess
+from iso639 import Lang
+# taken from accompanying python code by Tommi Jauhiainen
+# and adapted for ISO 639-3 to ISO 639-1 conv
+# source: https://zenodo.org/record/5890998/
+def run_heli(text):
+    p = subprocess.run(['java', '-jar', 'HeLI.jar', '-c'], stdout=subprocess.PIPE, input=text, encoding='UTF-8')
+    iso_639_3 = p.stdout.split("\t")[0]
+    iso_639_1 = Lang(iso_639_3).pt1
+
+    return iso_639_1
+
 ################################### 
 ####     Evaluation stuff      ####
 ###################################
@@ -36,12 +48,15 @@ def eval_on_texts(texts):
     "transliterate": [],
     "whatthelang": [],
     "langdetect": [],
+    "heli": [],
         }
 
     for lang, li in texts.items():
+        
         for ph in li:
             results['Language'].append(lang)
             results['Sentence'].append(ph)
+            
             
             guessed = langid.classify(ph)[0]
             if guessed == lang:
@@ -86,6 +101,14 @@ def eval_on_texts(texts):
                     results['langdetect'].append(False)
             except LangDetectException:
                 results['langdetect'].append(False) 
+
+            
+            guessed = run_heli(ph)        
+            if guessed == lang:
+                results['heli'].append(True)
+            else:
+                results['heli'].append(False)
+            
 
     return results
 
